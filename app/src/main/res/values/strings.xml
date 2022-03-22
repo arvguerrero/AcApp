@@ -1,0 +1,51 @@
+<resources>
+    <string name="app_name">AcApp</string>
+
+    <!-- Login page and Sign up page   -->
+    <string name="logo">logo</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="business_name">Business Name</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="register">Register</string>
+    <string name="already_have_an_account">Already Have an Account?</string>
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="don_t_have_an_account_sign_up">Don\'t have an Account? Sign up</string>
+
+    <!--Popup Windows-->
+    <string name="product">Product</string>
+    <string name="raw_material">Raw Material</string>
+    <string name="enter_product_name">Enter product name</string>
+    <string name="code">Code</string>
+    <string name="enter_product_code">Enter product code</string>
+    <string name="stock_levels">Stock Levels</string>
+    <string name="enter_stock_amount">Enter stock amount</string>
+    <string name="price">Price</string>
+    <string name="enter_price">Enter price</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+
+    <!--Inventory Management-->
+    <string name="search_button">search button</string>
+    <string name="add_button">add button</string>
+    <string name="products">Products</string>
+    <string name="raw_materials">Raw Materials</string>
+    <string name="equipment">Equipment</string>
+
+    <!--Dashboard-->
+    <string name="sales_per_product">Sales per Product</string>
+    <string name="products_sold">Products Sold</string>
+    <string name="remaining_products">Remaining Products</string>
+
+    <!--Placeholders-->
+    <string name="strawberry_cheesecake">Strawberry Cheesecake</string>
+    <string name="sb8612">SB8612</string>
+    <string name="_50">50</string>
+    <string name="_89_99">89.99</string>
+    <string name="_60">60</string>
+    <string name="_10">10</string>
+    <string name="logout">logout</string>
+</resources>

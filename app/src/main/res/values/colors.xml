@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="apache">#DDBE65</color>
+    <color name="anzac">#ECCF69</color>
+    <color name="sandwisp">#F8E7AC</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="periwinkle">#CDD8E8</color>
+    <color name="polo">#A7BCD7</color>
+    <color name="manatee">#9190AC</color>
+    <color name="shark">#2B2C34</color>
+    <color name="woodsmoke">#0C0C0E</color>
+    <color name="big_stone">#1B2E48</color>
+    <color name="shuttle">#5A687C</color>
+</resources>

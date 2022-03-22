@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/llMain"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:clickable="true">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="10dp">
+        <TextView
+            android:id="@+id/rvName"
+            android:layout_width="220dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/woodsmoke"
+            android:textSize="16sp"
+            android:fontFamily="@font/prompt"
+            tools:text="Name" />
+        <!--<TextView
+            android:id="@+id/rvDate"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/shuttle"
+            android:textSize="12sp"
+            android:fontFamily="@font/prompt"
+            tools:text="01/01/2022" />-->
+        <TextView
+            android:id="@+id/rvProfit"
+            android:layout_width="100dp"
+            android:gravity="end"
+            android:layout_height="wrap_content"
+            android:textColor="@color/woodsmoke"
+            android:textSize="16sp"
+            android:fontFamily="@font/prompt"
+            tools:text="8000" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/polo"
+        />
+
+</LinearLayout>

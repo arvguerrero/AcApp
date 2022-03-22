@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.DashboardActivity">
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/dashBusinessName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:fontFamily="@font/prompt"
+            android:padding="5dp"
+            android:text=""
+            android:textColor="@color/anzac"
+            android:textSize="16sp" />
+
+        <View
+            android:layout_width="200dp"
+            android:layout_height="1dp"
+            android:layout_gravity="center"
+            android:background="@color/anzac" />
+
+        <TextView
+            android:id="@+id/textViewInventory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/prompt_bold"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:text="Inventory"
+            android:textAlignment="center"
+            android:textColor="@color/big_stone"
+            android:textSize="28sp"
+            android:layout_marginBottom="5dp"/>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+
+                <View
+                    android:layout_width="220dp"
+                    android:layout_height="1dp"
+                    android:layout_gravity="end"
+                    android:background="@color/anzac" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+
+                <TextView
+                    android:id="@+id/soldProd"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/prompt_bold"
+                    android:paddingStart="20dp"
+                    android:text="Most Sold Product"
+                    android:textColor="@color/big_stone"
+                    android:textSize="20sp" />
+
+
+                <com.github.mikephil.charting.charts.PieChart
+                    android:id="@+id/pieChartSales"
+                    android:layout_width="match_parent"
+                    android:layout_height="520dp" />
+                <!--
+                              <com.github.mikephil.charting.charts.LineChart
+                                    android:id="@+id/lineChart"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="520dp">
+
+                                </com.github.mikephil.charting.charts.LineChart>
+                -->
+                <TextView
+                    android:id="@+id/spp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/prompt_bold"
+                    android:paddingStart="20dp"
+                    android:text="Products Inventory"
+                    android:textColor="@color/big_stone"
+                    android:textSize="20sp" />
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/barChartSales"
+                    android:layout_width="match_parent"
+                    android:layout_height="520dp">
+
+                </com.github.mikephil.charting.charts.BarChart>
+
+
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/prompt_bold"
+                    android:paddingStart="20dp"
+                    android:text="Raw Materials Inventory"
+                    android:textColor="@color/big_stone"
+                    android:textSize="20sp" />
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/barChartRawMaterials"
+                    android:layout_width="match_parent"
+                    android:layout_height="520dp" />
+
+                <View
+                    android:layout_width="220dp"
+                    android:layout_height="1dp"
+                    android:layout_gravity="start"
+                    android:background="@color/anzac" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="14dp"
+                    android:fontFamily="@font/prompt"
+                    android:textColor="@color/shark"
+                    android:layout_marginBottom="48dp"/>
+
+            </LinearLayout>
+        </ScrollView>
+
+    </LinearLayout>
+
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.bottomappbar.BottomAppBar
+            android:id="@+id/bottomMapBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:visibility="visible">
+
+            <com.google.android.material.bottomnavigation.BottomNavigationView
+                android:id="@+id/bottomNavigationBar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/rounded"
+                app:itemIconTint="@color/white"
+                app:itemTextColor="@color/white"
+                app:labelVisibilityMode="selected"
+                app:menu="@menu/nav_menu" />
+
+        </com.google.android.material.bottomappbar.BottomAppBar>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="10dp"
+        android:src="@drawable/ic_back"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"/>
+
+</RelativeLayout>

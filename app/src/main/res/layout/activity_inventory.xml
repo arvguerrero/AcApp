@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.DashboardActivity">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/linearLayoutCompat"
+            android:layout_width="match_parent"
+            android:layout_height="678dp"
+            android:layout_margin="20dp"
+            android:orientation="vertical"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <View
+                android:layout_width="180dp"
+                android:layout_height="2dp"
+                android:layout_gravity="start"
+                android:background="@color/anzac" />
+            <TextView
+                android:id="@+id/productTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/prompt_bold"
+                android:textSize="16sp"
+                android:padding="5dp"
+                android:text="@string/products"
+                android:textColor="@color/big_stone" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/products"
+                android:layout_width="match_parent"
+                android:layout_height="240dp"
+                android:clickable="true"
+                 />
+
+            <View
+                android:layout_width="240dp"
+                android:layout_height="2dp"
+                android:layout_gravity="end"
+                android:background="@color/anzac" />
+
+            <TextView
+                android:id="@+id/materialsTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/prompt_bold"
+                android:padding="5dp"
+                android:textSize="16sp"
+                android:text="@string/raw_materials"
+                android:textColor="@color/big_stone" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/materials"
+                android:layout_width="match_parent"
+                android:layout_height="240dp"
+                android:clickable="true" />
+            <View
+                android:layout_width="360dp"
+                android:layout_height="2dp"
+                android:layout_gravity="center"
+                android:background="@color/anzac" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    app:layout_constraintTop_toBottomOf="@+id/choose">
+                    <Button
+                        android:id="@+id/rawBtn"
+                        android:text="Add Material"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="5dp"
+                        android:background="@drawable/btn_bg"/>
+                    <Button
+                        android:id="@+id/prodBtn"
+                        android:text="Add Product"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/btn_bg"/>
+                </LinearLayout>
+            </LinearLayout>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/reload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_marginBottom="12dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/ic_reload"
+        android:layout_toLeftOf="@id/back"
+        android:layout_alignParentBottom="true"/>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_marginBottom="12dp"
+        android:layout_marginEnd="12dp"
+        android:src="@drawable/ic_back"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        />
+</RelativeLayout>

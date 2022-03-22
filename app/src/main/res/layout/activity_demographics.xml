@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.DashboardActivity">
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/dashBusinessName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:fontFamily="@font/prompt"
+            android:padding="5dp"
+            android:text=""
+            android:textColor="@color/anzac"
+            android:textSize="16sp" />
+        <View
+            android:layout_width="200dp"
+            android:layout_height="1dp"
+            android:layout_gravity="center"
+            android:background="@color/anzac" />
+        <TextView
+            android:id="@+id/textViewMarketing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/prompt_bold"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_marginBottom="5dp"
+            android:text="Demographics"
+            android:textAlignment="center"
+            android:textColor="@color/big_stone"
+            android:textSize="28sp" />
+
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+         <!--       <TextView
+                    android:id="@+id/textViewMarketing"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/prompt_bold"
+                    android:paddingStart="20dp"
+                    android:text="Market Demographics"
+                    android:textAlignment="center"
+                    android:textColor="@color/big_stone"
+                    android:textSize="28sp" />
+-->
+                <View
+                    android:layout_width="180dp"
+                    android:layout_height="1dp"
+                    android:layout_gravity="end"
+                    android:background="@color/anzac" />
+
+                <TextView
+                    android:id="@+id/textAge"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/prompt_bold"
+                    android:paddingStart="20dp"
+                    android:text="Total population by age group (MALE)"
+                    android:textColor="@color/big_stone"
+                    android:textSize="20sp" />
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/barChartAge"
+                    android:layout_width="match_parent"
+                    android:layout_height="520dp" />
+
+                <TextView
+                    android:id="@+id/textGender"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/prompt_bold"
+                    android:paddingStart="20dp"
+                    android:text="Total population by age group (FEMALE)"
+                    android:textColor="@color/big_stone"
+                    android:textSize="20sp" />
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/barChartGender"
+                    android:layout_width="match_parent"
+                    android:layout_height="520dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="14dp"
+                    android:fontFamily="@font/prompt"
+                    android:textColor="@color/shark"
+                    android:layout_marginBottom="48dp"/>
+
+            </LinearLayout>
+        </ScrollView>
+
+    </LinearLayout>
+
+
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.bottomappbar.BottomAppBar
+            android:id="@+id/bottomMapBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:visibility="visible">
+
+            <com.google.android.material.bottomnavigation.BottomNavigationView
+                android:id="@+id/bottomNavigationBar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/rounded"
+                app:itemIconTint="@color/white"
+                app:itemTextColor="@color/white"
+                app:labelVisibilityMode="selected"
+                app:menu="@menu/nav_menu" />
+
+        </com.google.android.material.bottomappbar.BottomAppBar>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="10dp"
+        android:src="@drawable/ic_back"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"/>
+</RelativeLayout>
