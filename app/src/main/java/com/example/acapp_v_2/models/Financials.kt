@@ -6,6 +6,5 @@ data class Financials(
     var profit: String ?= null,
     var name: String ?= null,
     var uid: String ?= null,
-    var date: Timestamp ?= null,
-    var item: String ?= null
+    var date: Timestamp ?= null
 )

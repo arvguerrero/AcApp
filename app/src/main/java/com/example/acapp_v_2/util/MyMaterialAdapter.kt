@@ -8,7 +8,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.acapp_v_2.R
-import com.example.acapp_v_2.activities.AdminInventory
 import com.example.acapp_v_2.activities.InventoryActivity
 import com.example.acapp_v_2.models.Material
 import com.example.acapp_v_2.models.Product
@@ -22,11 +21,8 @@ class MyMaterialAdapter(val context: Context, private val materialList : ArrayLi
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val material : Material = materialList[position]
         holder.rvName.text = material.materialName
-        holder.quantity.text = material.stockLevel
         holder.rvMore.setOnClickListener { view ->
             if (context is InventoryActivity) {
-                context.materialInfoDialog(material)
-            }else if (context is AdminInventory) {
                 context.materialInfoDialog(material)
             }
         }
@@ -40,6 +36,5 @@ class MyMaterialAdapter(val context: Context, private val materialList : ArrayLi
     class MyViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
         val rvName : TextView = itemView.findViewById(R.id.rvName)
         val rvMore: ImageView = itemView.findViewById(R.id.rvMore)
-        val quantity : TextView = itemView.findViewById(R.id.rvQuantity)
     }
 }

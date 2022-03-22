@@ -32,7 +32,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firestore.admin.v1.Index
 import kotlinx.android.synthetic.main.activity_dashboard.*
-import java.lang.Exception
 
 class DashboardActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
@@ -74,7 +73,6 @@ class DashboardActivity : AppCompatActivity() {
         }
 
         val dashBusinessName = findViewById<TextView>(R.id.dashBusinessName)
-        //val sumText = findViewById<TextView>(R.id.sum)
         val productList: ArrayList<ProductBar> = ArrayList<ProductBar>()
         var productName: String
         var productCode: String
@@ -147,9 +145,6 @@ class DashboardActivity : AppCompatActivity() {
 
                         val pieEntries = ArrayList<PieEntry>()
                         val name = ArrayList<String>()
-                        val prof = ArrayList<Float>()
-
-                        val sum = ArrayList<Float>()
                         Log.d(ContentValues.TAG, "List: ${productList}")
                         for (i in productList.indices) {
                             val score = productList[i]
@@ -159,13 +154,12 @@ class DashboardActivity : AppCompatActivity() {
                             name.add(score.name1)
                             pieEntries.add(PieEntry(score.soldItems1.toFloat(), score.name1))
 
-                            //prof.add((score.price1.toFloat() * score.soldItems1.toFloat()))
-                            //sum.add(prof.sum())
-                            //Log.d(ContentValues.TAG, "sum1: ${sum}")
-                            //sumText.text = sum.toString()
+
                             ///
                             // MOST SOLD PRODUCT PIE CHART
                             ///
+
+
                             val dataSet = PieDataSet(pieEntries, "")
                             dataSet.setColors(*ColorTemplate.PASTEL_COLORS)
                             val data = PieData(dataSet)
@@ -302,7 +296,7 @@ class DashboardActivity : AppCompatActivity() {
         //xAxis.valueFormatter = MyAxisFormatter()
         xAxis.setDrawLabels(true)
         xAxis.granularity = 1f
-        xAxis.labelRotationAngle = +0f
+        xAxis.labelRotationAngle = +90f
 
     }
 
@@ -367,7 +361,7 @@ class DashboardActivity : AppCompatActivity() {
         //xAxis.valueFormatter = MyAxisFormatter()
         xAxis.setDrawLabels(true)
         xAxis.granularity = 1f
-        xAxis.labelRotationAngle = +0f
+        xAxis.labelRotationAngle = +90f
     }
 }
 

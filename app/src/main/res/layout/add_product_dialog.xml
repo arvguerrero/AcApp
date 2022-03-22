@@ -71,6 +71,26 @@
             android:hint="@string/enter_price"
             android:inputType="numberDecimal"
             app:layout_constraintTop_toBottomOf="@+id/price" />
+
+        <TextView
+            android:id="@+id/stockTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:fontFamily="@font/prompt_bold"
+            android:text="Stock Level"
+            android:textColor="@color/big_stone"
+            app:layout_constraintTop_toBottomOf="@+id/codeNumber" />
+
+        <EditText
+            android:id="@+id/stockLevel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Enter number of products produced"
+            android:inputType="numberSigned"
+            app:layout_constraintTop_toBottomOf="@+id/stock" />
+            />
     </LinearLayout>
 
     <LinearLayout

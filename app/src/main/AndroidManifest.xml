@@ -6,26 +6,11 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/logo"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/logo"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AcApp_v_2">
-        <activity
-            android:name=".activities.AdminProfile"
-            android:exported="false" />
-        <activity
-            android:name=".activities.LoadingActivity"
-            android:exported="false" />
-        <activity
-            android:name=".admin.AdminHome"
-            android:exported="false" />
-        <activity
-            android:name=".activities.AdminFinancials"
-            android:exported="false" />
-        <activity
-            android:name=".activities.AdminInventory"
-            android:exported="false" />
         <activity
             android:name=".activities.Demographics"
             android:exported="false" />

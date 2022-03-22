@@ -25,13 +25,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="3dp"
-            android:layout_marginBottom="5dp"
             android:fontFamily="@font/prompt_bold"
             android:padding="5dp"
             android:text="JDC Cafe"
             android:textColor="@color/anzac"
-            android:textSize="20sp" />
+            android:textSize="25sp" />
 
         <ImageView
             android:id="@+id/profilePicture"
@@ -61,7 +59,7 @@
                 android:layout_width="235dp"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/prompt_bold"
-                android:hint=""
+                android:hint="jdc@gmail.com"
                 android:padding="5dp"
                 android:textAlignment="textEnd"
                 android:textColor="@color/big_stone"
@@ -89,7 +87,7 @@
                 android:layout_width="235dp"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/prompt_bold"
-                android:hint=""
+                android:hint="Juan"
                 android:padding="5dp"
                 android:textAlignment="textEnd"
                 android:textColor="@color/big_stone"
@@ -117,7 +115,7 @@
                 android:layout_width="235dp"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/prompt_bold"
-                android:hint=""
+                android:hint="Dela Cruz"
                 android:padding="5dp"
                 android:textAlignment="textEnd"
                 android:textColor="@color/big_stone"
@@ -145,7 +143,7 @@
                 android:layout_width="235dp"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/prompt_bold"
-                android:hint=""
+                android:hint="Juan Dela Cruz Cafe"
                 android:padding="5dp"
                 android:textAlignment="textEnd"
                 android:textColor="@color/big_stone"
@@ -173,7 +171,7 @@
                 android:layout_width="235dp"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/prompt_bold"
-                android:hint=""
+                android:hint="09951230123"
                 android:padding="5dp"
                 android:textAlignment="textEnd"
                 android:textColor="@color/big_stone"
@@ -190,13 +188,4 @@
             android:padding="10dp"
             android:text="SAVE" />
     </LinearLayout>
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="12dp"
-        android:src="@drawable/ic_back"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"/>
 </RelativeLayout>

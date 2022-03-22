@@ -18,7 +18,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.482"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/logo" />
 
     <EditText
@@ -65,30 +64,17 @@
         app:layout_constraintStart_toStartOf="@+id/loginFirstName"
         app:layout_constraintTop_toBottomOf="@+id/loginFirstName" />
 
-    <CheckBox
-        android:id="@+id/checkbox_admin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
-        android:fontFamily="@font/prompt"
-        android:text="Login as Administrator"
-        app:layout_constraintBottom_toTopOf="@+id/btnlogin"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/loginPassword" />
-
     <Button
         android:id="@+id/btnlogin"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="32dp"
         android:background="@drawable/btn_bg"
         android:fontFamily="@font/prompt"
         android:text="Login"
         app:layout_constraintEnd_toEndOf="@+id/loginPassword"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/loginPassword"
-        app:layout_constraintTop_toBottomOf="@+id/checkbox_admin" />
+        app:layout_constraintTop_toBottomOf="@+id/loginPassword" />
 
     <TextView
         android:id="@+id/createAcc"

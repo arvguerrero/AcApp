@@ -6,6 +6,5 @@ data class Expense(
     var cost: String ?= null,
     var name: String ?= null,
     var uid: String ?= null,
-    var date: Timestamp ?= null,
-    var item: String ?= null
+    var date: Timestamp ?= null
 )

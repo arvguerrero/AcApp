@@ -58,79 +58,28 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal" />
 
-                <!--
-                                <View
-                                    android:layout_width="190dp"
-                                    android:layout_height="1dp"
-                                    android:layout_gravity="end"
-                                    android:background="@color/anzac" />
 
-                                <TextView
-                                    android:id="@+id/textProfit"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="@font/prompt_bold"
-                                    android:paddingStart="20dp"
-                                    android:text="Profit"
-                                    android:textColor="@color/big_stone"
-                                    android:textSize="20sp" />
 
-                                <com.github.mikephil.charting.charts.LineChart
-                                    android:id="@+id/lineChartProfit"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="520dp" />
-                                -->
-                <TextView
-                    android:id="@+id/Month"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/prompt_bold"
-                    android:text=""
-                    android:textAlignment="center"
-                    android:textColor="@color/big_stone"
-                    android:textSize="28sp" />
+                <View
+                    android:layout_width="190dp"
+                    android:layout_height="1dp"
+                    android:layout_gravity="end"
+                    android:background="@color/anzac" />
 
                 <TextView
-                    android:id="@+id/predict"
+                    android:id="@+id/textProfit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/prompt_bold"
                     android:paddingStart="20dp"
-                    android:text="Projected Income vs Actual"
+                    android:text="Profit"
                     android:textColor="@color/big_stone"
                     android:textSize="20sp" />
-                <TextView
-                    android:id="@+id/hw"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/prompt_bold"
-                    android:paddingStart="20dp"
-                    android:text=""
-                    android:textColor="@color/apache"
-                    android:textSize="20sp" />
-                <TextView
-                    android:id="@+id/ai"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/prompt_bold"
-                    android:paddingStart="20dp"
-                    android:text=""
-                    android:textColor="@color/big_stone"
-                    android:textSize="20sp" />
-                <TextView
-                    android:id="@+id/per"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/prompt_bold"
-                    android:paddingStart="20dp"
-                    android:text=""
-                    android:textColor="@color/anzac"
-                    android:textSize="20sp" />
-                <com.github.mikephil.charting.charts.BarChart
-                    android:id="@+id/barChartProjected"
+
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/lineChartProfit"
                     android:layout_width="match_parent"
                     android:layout_height="520dp" />
-
 
                 <TextView
                     android:id="@+id/textRevenues"
@@ -138,7 +87,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/prompt_bold"
                     android:paddingStart="20dp"
-                    android:text="Products Income (₱)"
+                    android:text="Revenue"
                     android:textColor="@color/big_stone"
                     android:textSize="20sp" />
 
@@ -148,27 +97,12 @@
                     android:layout_height="520dp" />
 
                 <TextView
-                    android:id="@+id/textFutureRevenues"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/prompt_bold"
-                    android:paddingStart="20dp"
-                    android:text="Unrealized Profit (₱)"
-                    android:textColor="@color/big_stone"
-                    android:textSize="20sp" />
-
-                <com.github.mikephil.charting.charts.BarChart
-                    android:id="@+id/barChartFutureRevenue"
-                    android:layout_width="match_parent"
-                    android:layout_height="520dp" />
-
-                <TextView
                     android:id="@+id/textExpenses"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/prompt_bold"
                     android:paddingStart="20dp"
-                    android:text="Remaining Material Inventory Cost (₱)"
+                    android:text="Expenses"
                     android:textColor="@color/big_stone"
                     android:textSize="20sp" />
 

@@ -3,9 +3,6 @@ package com.example.acapp_v_2.activities
 import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.ContentValues.TAG
-import android.content.Intent
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -15,7 +12,6 @@ import android.widget.EditText
 import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.acapp_v_2.R
@@ -31,6 +27,7 @@ import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_inventory.*
+import kotlinx.android.synthetic.main.activity_inventory.addBtn
 import kotlinx.android.synthetic.main.activity_inventory.productTitle
 import kotlinx.android.synthetic.main.add_product_dialog.view.*
 import kotlinx.android.synthetic.main.add_product_dialog.view.cancelBtn
@@ -60,25 +57,6 @@ class InventoryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_inventory)
-        this.overridePendingTransition(0,0)
-
-        val back = findViewById<View>(R.id.back)
-        back.setOnClickListener {
-            val intent = Intent(this, HomeActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(0,0)
-            finish()
-        }
-
-        val reload = findViewById<View>(R.id.reload)
-        reload.setOnClickListener {
-            val intent = Intent(this, LoadingActivity::class.java)
-            intent.putExtra("activity", "InventoryActivity")
-            startActivity(intent)
-            overridePendingTransition(0,0)
-            finish()
-        }
-
         db = FirebaseFirestore.getInstance()
 
         productRecyclerView = findViewById(R.id.products)
@@ -95,122 +73,117 @@ class InventoryActivity : AppCompatActivity() {
         myMaterialAdapter = MyMaterialAdapter(this, materialArrayList)
         materialRecyclerView.adapter = myMaterialAdapter
         auth = Firebase.auth
-
         AddListener()
         RawAddListener()
-        prodBtn.setOnClickListener {
-            val productDialogView =
-                LayoutInflater.from(this).inflate(R.layout.add_product_dialog, null)
-            val productBuilder = AlertDialog.Builder(this)
-                .setView(productDialogView)
-            val productAlertDialog = productBuilder.show()
-            productDialogView.saveBtn.setOnClickListener {
-                val name =
-                    productDialogView.findViewById<EditText>(R.id.productName).text.toString()
-                val price =
-                    productDialogView.findViewById<EditText>(R.id.prodPrice).text.toString()
-                val code =
-                    productDialogView.findViewById<EditText>(R.id.prodCode).text.toString()
-                val uid = auth.currentUser!!.uid
-                val product = HashMap<String, Any>()
-                product["productName"] = name
-                product["price"] = price
-                product["productCode"] = code
-                product["stockLevel"] = "0"
-                product["soldItems"] = "0"
-                product["uid"] = uid
-                db.collection("users").document(uid).collection("products").document(code)
-                    .set(product)
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "Product added successfully", Toast.LENGTH_SHORT)
-                            .show()
-                    }.addOnFailureListener {
-                        Toast.makeText(this, "Failed to create product", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                productAlertDialog.dismiss()
-            }
-            productDialogView.cancelBtn.setOnClickListener {
-                productAlertDialog.dismiss()
-            }
-        }
-        rawBtn.setOnClickListener {
-            val rawDialogView =
-                LayoutInflater.from(this).inflate(R.layout.add_material_dialog, null)
-            val rawBuilder = AlertDialog.Builder(this)
-                .setView(rawDialogView)
-            val rawAlertDialog = rawBuilder.show()
-            rawDialogView.saveBtn.setOnClickListener {
-                val name =
-                    rawDialogView.findViewById<EditText>(R.id.materialName).text.toString()
-                val price =
-                    rawDialogView.findViewById<EditText>(R.id.matPrice).text.toString()
-                val code =
-                    rawDialogView.findViewById<EditText>(R.id.materialCode).text.toString()
-                val stockLevel =
-                    rawDialogView.findViewById<EditText>(R.id.stockLevel).text.toString()
-                val thresholdLevel =
-                    rawDialogView.findViewById<EditText>(R.id.thresholdLevel).text.toString()
-                val uid = auth.currentUser!!.uid
-                val raw = HashMap<String, Any>()
-                raw["materialName"] = name
-                raw["price"] = price
-                raw["materialCode"] = code
-                raw["stockLevel"] = stockLevel
-                raw["thresholdLevel"] = thresholdLevel
-                raw["uid"] = uid
-                db.collection("users").document(uid).collection("materials").document(name)
-                    .set(raw)
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "Material added successfully", Toast.LENGTH_SHORT)
-                            .show()
-                    }.addOnFailureListener {
-                        Toast.makeText(this, "Failed to create material", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                val priceInt = price.toInt()
-                val stockInt = stockLevel.toInt()
-                var cost = priceInt * stockInt
-                val expense = cost.toString()
-                if (stockInt > 0) {
-                    var number = 0
-                    db.collection("users").document(uid).collection("expenses").get()
-                        .addOnSuccessListener { documents ->
-                            number = documents.size()
-                            var item = number.toString()
-                            for (document in documents){
-                                if (document.getString("item") == item) {
-                                    number += 1
-                                    item = number.toString()
-                                    val expenses = HashMap<String, Any>()
-                                    expenses["cost"] = expense
-                                    expenses["name"] = name
-                                    expenses["uid"] = uid
-                                    expenses["item"] = item
-                                    expenses["date"] = FieldValue.serverTimestamp()
-                                    db.collection("users").document(uid).collection("expenses")
-                                        .document(item)
-                                        .set(expenses)
-                                }
-                            }
-                            val expenses = HashMap<String, Any>()
-                            expenses["cost"] = expense
-                            expenses["name"] = name
-                            expenses["uid"] = uid
-                            expenses["item"] = item
-                            expenses["date"] = FieldValue.serverTimestamp()
-                            db.collection("users").document(uid).collection("expenses")
-                                .document(item)
-                                .set(expenses)
+        addBtn.setOnClickListener {
+            val mDialogView = LayoutInflater.from(this).inflate(R.layout.material_product, null)
+            val mBuilder = AlertDialog.Builder(this)
+                .setView(mDialogView)
+            val mAlertDialog = mBuilder.show()
+            //PRODUCT
+            mDialogView.prodBtn.setOnClickListener {
+                val productDialogView =
+                    LayoutInflater.from(this).inflate(R.layout.add_product_dialog, null)
+                val productBuilder = AlertDialog.Builder(this)
+                    .setView(productDialogView)
+                val productAlertDialog = productBuilder.show()
+                productDialogView.saveBtn.setOnClickListener {
+                    val name =
+                        productDialogView.findViewById<EditText>(R.id.productName).text.toString()
+                    val price =
+                        productDialogView.findViewById<EditText>(R.id.prodPrice).text.toString()
+                    val code =
+                        productDialogView.findViewById<EditText>(R.id.prodCode).text.toString()
+                    val stockedItems =
+                        productDialogView.findViewById<EditText>(R.id.stockLevel).text.toString()
+                    val uid = auth.currentUser!!.uid
+                    val product = HashMap<String, Any>()
+                    product["productName"] = name
+                    product["price"] = price
+                    product["productCode"] = code
+                    product["stockLevel"] = stockedItems
+                    product["soldItems"] = "0"
+                    product["uid"] = uid
+                    db.collection("users").document(uid).collection("products").document(code)
+                        .set(product)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Product added successfully", Toast.LENGTH_SHORT)
+                                .show()
+                        }.addOnFailureListener {
+                            Toast.makeText(this, "Failed to create product", Toast.LENGTH_SHORT)
+                                .show()
                         }
+                    productAlertDialog.dismiss()
                 }
-                rawAlertDialog.dismiss()
+                productDialogView.cancelBtn.setOnClickListener {
+                    productAlertDialog.dismiss()
+                }
+                mAlertDialog.dismiss()
             }
+            mDialogView.rawBtn.setOnClickListener {
+                val rawDialogView =
+                    LayoutInflater.from(this).inflate(R.layout.add_material_dialog, null)
+                val rawBuilder = AlertDialog.Builder(this)
+                    .setView(rawDialogView)
+                val rawAlertDialog = rawBuilder.show()
+                rawDialogView.saveBtn.setOnClickListener {
+                    val name =
+                        rawDialogView.findViewById<EditText>(R.id.materialName).text.toString()
+                    val price =
+                        rawDialogView.findViewById<EditText>(R.id.matPrice).text.toString()
+                    val code =
+                        rawDialogView.findViewById<EditText>(R.id.materialCode).text.toString()
+                    val stockLevel =
+                        rawDialogView.findViewById<EditText>(R.id.stockLevel).text.toString()
+                    val thresholdLevel =
+                        rawDialogView.findViewById<EditText>(R.id.thresholdLevel).text.toString()
+                    val uid = auth.currentUser!!.uid
+                    val raw = HashMap<String, Any>()
+                    raw["materialName"] = name
+                    raw["price"] = price
+                    raw["materialCode"] = code
+                    raw["stockLevel"] = stockLevel
+                    raw["thresholdLevel"] = thresholdLevel
+                    raw["uid"] = uid
+                    db.collection("users").document(uid).collection("materials").document(name)
+                        .set(raw)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Material added successfully", Toast.LENGTH_SHORT)
+                                .show()
+                        }.addOnFailureListener {
+                            Toast.makeText(this, "Failed to create material", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    val priceInt = price.toInt()
+                    val stockInt = stockLevel.toInt()
+                    var cost = priceInt * stockInt
+                    val expense = cost.toString()
+                    val expenses = HashMap<String, Any>()
+                    expenses["cost"] = expense
+                    expenses["name"] = name
+                    expenses["uid"] = uid
+                    db.collection("users").document(uid).collection("expenses").document()
+                        .set(expenses)
 
-            rawDialogView.cancelBtn.setOnClickListener {
-                rawAlertDialog.dismiss()
+                    rawAlertDialog.dismiss()
+                }
+
+                rawDialogView.cancelBtn.setOnClickListener {
+                    rawAlertDialog.dismiss()
+                }
+                mAlertDialog.dismiss()
             }
         }
+
+        val searchView = findViewById<SearchView>(R.id.searchEdt)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                return false
+            }
+            override fun onQueryTextChange(query: String?): Boolean {
+                return false
+            }
+        })
         var totalExpense = 0.0
         var totalIncome = 0.0
         val uid = auth.currentUser!!.uid
@@ -390,36 +363,14 @@ class InventoryActivity : AppCompatActivity() {
                         val priceInt = price!!.toInt()
                         var profit = priceInt * add
                         val income = profit.toString()
-                        val name = document.getString("productName")!!
                         if (add > 0) {
-                            var number = 0
-                            db.collection("users").document(uid).collection("income").get()
-                                .addOnSuccessListener { documents ->
-                                    number = documents.size()
-                                    var item = number.toString()
-                                    for (document in documents){
-                                        if (document.getString("item") == item) {
-                                            number += 1
-                                            item = number.toString()
-                                            val profits = HashMap<String, Any>()
-                                            profits["profit"] = income
-                                            profits["name"] = name
-                                            profits["uid"] = uid
-                                            profits["date"] = FieldValue.serverTimestamp()
-                                            profits["item"] = item
-                                            db.collection("users").document(uid).collection("income").document(item)
-                                                .set(profits)
-                                        }
-                                    }
-                                    val profits = HashMap<String, Any>()
-                                    profits["profit"] = income
-                                    profits["name"] = document.getString("productName")!!
-                                    profits["uid"] = uid
-                                    profits["date"] = FieldValue.serverTimestamp()
-                                    profits["item"] = item
-                                    db.collection("users").document(uid).collection("income").document(item)
-                                        .set(profits)
-                                }
+                            val profits = HashMap<String, Any>()
+                            profits["profit"] = income
+                            profits["name"] = document.getString("productName")!!
+                            profits["uid"] = uid
+                            profits["date"] = FieldValue.serverTimestamp()
+                            db.collection("users").document(uid).collection("income").document()
+                                .set(profits)
                         }
 
                         db.collection("users").document(uid).collection("products").document(code).collection("ingredients")
@@ -465,11 +416,11 @@ class InventoryActivity : AppCompatActivity() {
                     }
                 }
             productAlertDialog.dismiss()
-            val intent = Intent(this, LoadingActivity::class.java)
-            intent.putExtra("activity", "InventoryActivity")
-            startActivity(intent)
-            overridePendingTransition(0,0)
-            finish()
+            Toast.makeText(
+                applicationContext,
+                "Record updated successfully.",
+                Toast.LENGTH_SHORT
+            ).show()
             myAdapter.notifyDataSetChanged()
             //TO DO: AUTOMATIC LIST UPDATE
         })
@@ -487,13 +438,12 @@ class InventoryActivity : AppCompatActivity() {
                     .delete()
                     .addOnSuccessListener {
                         Toast.makeText(
-                            applicationContext,
-                            "Record deleted successfully.",
-                            Toast.LENGTH_SHORT
-                        ).show() }
+                        applicationContext,
+                        "Record deleted successfully.",
+                        Toast.LENGTH_SHORT
+                    ).show() }
                     .addOnFailureListener { e -> Log.w(TAG, "Error deleting document", e) }
-                dialogInterface.dismiss()
-                DeleteListener()
+                dialogInterface.dismiss() // Dialog will be dismissed
             }
             builder.setNegativeButton("No") { dialogInterface, which ->
                 dialogInterface.dismiss()
@@ -512,14 +462,12 @@ class InventoryActivity : AppCompatActivity() {
             val ingredientBuilder = AlertDialog.Builder(this)
                 .setView(ingredientDialogView)
             val ingredientAlertDialog = ingredientBuilder.show()
-
             ingredientRecyclerView = ingredientDialogView.findViewById(R.id.ingredientList)
             ingredientRecyclerView.layoutManager = LinearLayoutManager(this)
             ingredientRecyclerView.setHasFixedSize(true)
             ingredientArrayList = arrayListOf()
             ingredientAdapter = IngredientAdapter(this, ingredientArrayList)
             ingredientRecyclerView.adapter = ingredientAdapter
-
             db = FirebaseFirestore.getInstance()
             val uid = auth.currentUser!!.uid
             db.collection("users").document(uid).collection("products").document(product.productCode.toString()).collection("ingredients")
@@ -551,7 +499,6 @@ class InventoryActivity : AppCompatActivity() {
                 db.collection("users").document(uid).collection("products")
                     .document(product.productCode.toString()).collection("ingredients")
                     .document(ingredientName).set(ingredient)
-
             }
             ingredientDialogView.cancelBtn.setOnClickListener {
                 ingredientAlertDialog.dismiss()
@@ -596,64 +543,35 @@ class InventoryActivity : AppCompatActivity() {
             updateMaterial
                 .get()
                 .addOnSuccessListener { document ->
-                    if (document != null) {
+                    if (document != null){
                         val oldItems = document.getString("stockLevel")
                         val old = oldItems!!.toInt()
                         val add = addItems!!.toInt()
                         val stockLevel = old + add
                         updateMaterial
-                            .update(
-                                mapOf(
-                                    "price" to price,
-                                    "stockLevel" to stockLevel.toString(),
-                                    "thresholdLevel" to thresholdLevel
-                                )
-                            )
+                            .update(mapOf(
+                            "price" to price,
+                            "stockLevel" to stockLevel.toString(),
+                            "thresholdLevel" to thresholdLevel
+                        ))
 
-                        if (addItems != "") {
-                            val priceInt = price!!.toInt()
-                            val cost = priceInt * addItems.toInt()
-                            val expense = cost.toString()
-                            var number = 0
-                            db.collection("users").document(uid).collection("expenses").get()
-                                .addOnSuccessListener { documents ->
-                                    number = documents.size()
-                                    var item = number.toString()
-                                    for (document in documents){
-                                        if (document.getString("item") == item) {
-                                            number += 1
-                                            item = number.toString()
-                                            val expenses = HashMap<String, Any>()
-                                            expenses["cost"] = expense
-                                            expenses["name"] = name
-                                            expenses["uid"] = uid
-                                            expenses["item"] = item
-                                            expenses["date"] = FieldValue.serverTimestamp()
-                                            db.collection("users").document(uid).collection("expenses")
-                                                .document(item)
-                                                .set(expenses)
-                                        }
-                                    }
-                                    val expenses = HashMap<String, Any>()
-                                    expenses["cost"] = expense
-                                    expenses["name"] = document.getString("materialName")!!
-                                    expenses["uid"] = uid
-                                    expenses["item"] = item
-                                    expenses["date"] = FieldValue.serverTimestamp()
-                                    db.collection("users").document(uid).collection("expenses")
-                                        .document(item)
-                                        .set(expenses)
-                                }
-                        }
+                        val priceInt = price!!.toInt()
+                        val cost = priceInt * add
+                        val expense = cost.toString()
+                        val expenses = HashMap<String, Any>()
+                        expenses["cost"] = expense
+                        expenses["name"] = document.getString("materialName")!!
+                        expenses["uid"] = uid
+                        db.collection("users").document(uid).collection("expenses").document()
+                            .set(expenses)
                     }
-
                 }
             rawAlertDialog.dismiss()
-            val intent = Intent(this, LoadingActivity::class.java)
-            intent.putExtra("activity", "InventoryActivity")
-            startActivity(intent)
-            overridePendingTransition(0,0)
-            finish()
+            Toast.makeText(
+                applicationContext,
+                "Record updated successfully.",
+                Toast.LENGTH_SHORT
+            ).show()
             myMaterialAdapter.notifyDataSetChanged()
             //TO DO: AUTOMATIC LIST UPDATE
         })
@@ -666,18 +584,17 @@ class InventoryActivity : AppCompatActivity() {
             builder.setMessage("Are you sure you wants to delete this item?")
             builder.setPositiveButton("Yes") { dialogInterface, which ->
                 val uid = auth.currentUser!!.uid
-                val name = materialName.text.toString()
-                db.collection("users").document(uid).collection("materials").document(name)
+                val code = codeNumber.text.toString()
+                db.collection("users").document(uid).collection("materials").document(code)
                     .delete()
                     .addOnSuccessListener {
                         Toast.makeText(
-                            applicationContext,
-                            "Record deleted successfully.",
-                            Toast.LENGTH_SHORT
-                        ).show() }
+                        applicationContext,
+                        "Record deleted successfully.",
+                        Toast.LENGTH_SHORT
+                    ).show() }
                     .addOnFailureListener { e -> Log.w(TAG, "Error deleting document", e) }
-                dialogInterface.dismiss()
-                // Dialog will be dismissed
+                dialogInterface.dismiss() // Dialog will be dismissed
             }
             builder.setNegativeButton("No") { dialogInterface, which ->
                 dialogInterface.dismiss()
@@ -695,14 +612,13 @@ class InventoryActivity : AppCompatActivity() {
 
     fun ingredientInfoDialog(ingredient: Ingredients) {
         val code = ingredient.productId.toString()
-        val name = ingredient.ingredientName.toString()
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Delete Record")
         builder.setMessage("Are you sure you wants to delete this item?")
         builder.setPositiveButton("Yes") { dialogInterface, which ->
             val uid = auth.currentUser!!.uid
             db.collection("users").document(uid).collection("products").document(code)
-                .collection("ingredients").document(name)
+                .collection("ingredients").document(ingredient.ingredientName.toString())
                 .delete()
                 .addOnSuccessListener {
                     Toast.makeText(
@@ -730,13 +646,7 @@ class InventoryActivity : AppCompatActivity() {
                         })
                 }
                 .addOnFailureListener { e -> Log.w(TAG, "Error deleting document", e) }
-            dialogInterface.dismiss()
-            val intent = Intent(this, LoadingActivity::class.java)
-            intent.putExtra("activity", "InventoryActivity")
-            startActivity(intent)
-            overridePendingTransition(0,0)
-            finish()
-            // Dialog will be dismissed
+            dialogInterface.dismiss() // Dialog will be dismissed
         }
         builder.setNegativeButton("No") { dialogInterface, which ->
             dialogInterface.dismiss()

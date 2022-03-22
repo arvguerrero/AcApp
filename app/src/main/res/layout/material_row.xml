@@ -13,36 +13,14 @@
         android:orientation="horizontal"
         android:padding="10dp">
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/periwinkle"
-            android:textSize="12sp"
-            android:text="Name:"
-            android:layout_marginEnd="5dp"/>
-        <TextView
             android:id="@+id/rvName"
-            android:layout_width="160dp"
+            android:layout_width="310dp"
             android:layout_height="wrap_content"
             android:textColor="@color/woodsmoke"
             android:textSize="16sp"
             android:fontFamily="@font/prompt"
-            tools:text="Name"
-            android:layout_marginEnd="10dp"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/periwinkle"
-            android:textSize="12sp"
-            android:text="Qty:"
-            android:layout_marginEnd="5dp"/>
-        <TextView
-            android:id="@+id/rvQuantity"
-            android:layout_width="60dp"
-            android:layout_height="wrap_content"
-            android:textColor="@color/woodsmoke"
-            android:textSize="16sp"
-            android:text="5"
-            android:layout_marginEnd="10dp"/>
+            tools:text="Name" />
+
         <ImageView
             android:id="@+id/rvMore"
             android:layout_width="20dp"

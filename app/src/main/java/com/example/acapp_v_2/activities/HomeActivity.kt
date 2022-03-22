@@ -21,16 +21,11 @@ class HomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
-        overridePendingTransition(0,0)
-
-        db = FirebaseFirestore.getInstance()
-        auth = Firebase.auth
 
         val dashboard = findViewById<Button>(R.id.btn_dashboard)
         dashboard.setOnClickListener {
             val intent = Intent(this, DashboardActivity::class.java)
             startActivity(intent)
-            overridePendingTransition(0, 0)
         }
 
         val inventory = findViewById<Button>(R.id.btn_inventory)
@@ -67,51 +62,5 @@ class HomeActivity : AppCompatActivity() {
                 mAlertDialog.dismiss()
             }
         }
-        var totalExpense = 0.0
-        var totalIncome = 0.0
-        val uid = auth.currentUser!!.uid
-        db.collection("users").document(uid).collection("expenses")
-            .whereEqualTo("uid", uid)
-            .get()
-            .addOnSuccessListener { documents ->
-                for (document in documents) {
-                    if (document != null) {
-                        val cost = document.getString("cost")
-                        totalExpense += cost!!.toDouble()
-                    } else {
-                        Log.d(ContentValues.TAG, "No such document")
-                    }
-                }
-                val cost = totalExpense.toString()
-                db.collection("users").document(uid)
-                    .update(mapOf(
-                        "expenses" to cost
-                    ))
-            }
-            .addOnFailureListener {
-                Log.w(ContentValues.TAG, "Error getting documents:")
-            }
-
-        db.collection("users").document(uid).collection("income")
-            .whereEqualTo("uid", uid)
-            .get()
-            .addOnSuccessListener { documents ->
-                for (document in documents) {
-                    if (document != null) {
-                        val profit = document.getString("profit")
-                        totalIncome += profit!!.toDouble()
-                    } else {
-                        Log.d(ContentValues.TAG, "No such document")
-                    }
-                }
-                val income = totalIncome.toString()
-                db.collection("users").document(uid)
-                    .update(mapOf(
-                        "income" to income
-                    ))
-            }
-            .addOnFailureListener {
-                Log.w(ContentValues.TAG, "Error getting documents:")
-            }
     }
 }
