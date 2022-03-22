@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import com.example.acapp_v_2.R
 import com.example.acapp_v_2.models.*
 import com.github.mikephil.charting.charts.BarChart
@@ -39,6 +40,15 @@ class Demographics : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_demographics)
+        overridePendingTransition(0,0)
+
+        val back = findViewById<View>(R.id.back)
+        back.setOnClickListener {
+            val intent = Intent(this, HomeActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(0,0)
+            finish()
+        }
 
         val menu: Menu = bottomNavigationBar.menu
         val menuItem: MenuItem = menu.getItem(2)

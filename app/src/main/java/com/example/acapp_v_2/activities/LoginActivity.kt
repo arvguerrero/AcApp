@@ -2,9 +2,12 @@ package com.example.acapp_v_2.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.widget.CheckBox
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.acapp_v_2.R
+import com.example.acapp_v_2.admin.AdminHome
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
@@ -18,6 +21,7 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+        overridePendingTransition(0,0)
         auth = Firebase.auth
         createAcc.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
@@ -55,18 +59,16 @@ class LoginActivity : AppCompatActivity() {
             }
     }
 
-    public override fun onStart() {
-        super.onStart()
-        val currentUser = auth.currentUser
-        updateUI(currentUser)
-    }
-
     private fun updateUI(currentUser : FirebaseUser?){
         if (currentUser != null){
-            startActivity(Intent(this, HomeActivity::class.java))
-            finish()
-        } else {
-            Toast.makeText(baseContext, "Please login.", Toast.LENGTH_SHORT).show()
+            val admin = findViewById<CheckBox>(R.id.checkbox_admin)
+            if (admin.isChecked){
+                startActivity(Intent(this, AdminHome::class.java))
+                finish()
+            } else {
+                startActivity(Intent(this, HomeActivity::class.java))
+                finish()
+            }
         }
     }
 }

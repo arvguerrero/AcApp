@@ -29,28 +29,81 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_dashboard.*
+import android.widget.EditText
+import android.widget.TextView
+import kotlin.Throws
+import android.content.res.AssetFileDescriptor
+import android.os.Build
+import android.view.View
+import android.widget.Button
+import androidx.annotation.RequiresApi
+import com.github.mikephil.charting.components.YAxis
+import com.google.gson.internal.bind.util.ISO8601Utils.format
+import com.squareup.okhttp.internal.http.HttpDate.format
+import kotlinx.android.synthetic.main.activity_dashboard.bottomNavigationBar
+import kotlinx.android.synthetic.main.activity_dashboard.dashBusinessName
+import kotlinx.android.synthetic.main.activity_finance.*
+import okhttp3.internal.http.HttpDate.format
+import org.tensorflow.lite.Interpreter
+import java.io.FileInputStream
+import java.io.IOException
+import java.lang.Exception
+import java.lang.String.format
+import java.nio.MappedByteBuffer
+import java.nio.channels.FileChannel
+import java.text.DateFormat
+import java.text.DecimalFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.*
+import kotlin.collections.ArrayList
 
 class Finance : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
     private lateinit var product: Product
 
+    private lateinit var calendar: Calendar
+    var tflite: Interpreter? = null
+    private lateinit var ai: TextView
+    private lateinit var per: TextView
+    private lateinit var outp: TextView
+    private lateinit var month: TextView
+    private lateinit var pred: Button
+
     private lateinit var lineChartProfit: LineChart
     private lateinit var lineChart: LineChart
 
 
     private lateinit var barChartRevenue: BarChart
+    private lateinit var barChartFutureRevenue: BarChart
     private lateinit var barChartExpenses: BarChart
-
+    private lateinit var barChartProject: BarChart
 
 
     private var productList: ArrayList<ProductBar> = ArrayList<ProductBar>()
     private var materialList: ArrayList<MaterialBar> = ArrayList<MaterialBar>()
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_finance)
+        overridePendingTransition(0,0)
+
+        val back = findViewById<View>(R.id.back)
+        back.setOnClickListener {
+            val intent = Intent(this, HomeActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(0,0)
+            finish()
+        }
+
+        outp = findViewById(R.id.hw)
+        ai = findViewById(R.id.ai)
+        per = findViewById(R.id.per)
+        month = findViewById(R.id.Month)
 
         val menu: Menu = bottomNavigationBar.menu
         val menuItem: MenuItem = menu.getItem(1)
@@ -71,19 +124,407 @@ class Finance : AppCompatActivity() {
             true
         }
 
+        getMonth()
+
         db = FirebaseFirestore.getInstance()
         auth = Firebase.auth
         val uid = auth.currentUser!!.uid
 
         //GetBusinessName
-
+        val barEntries1: ArrayList<BarEntry> = ArrayList()
+        val barEntries2: ArrayList<BarEntry> = ArrayList()
         val Name = db.collection("users").document(uid)
         Name.get()
             .addOnSuccessListener { document ->
                 if (document != null) {
+
+                    barChartProject = findViewById(R.id.barChartProjected)
+                    initBarChartProject()
                     dashBusinessName.text = document.getString("businessName")
+                    val income = document.getString("income")
+                    val expenses = document.getString("expenses")
+
+                    val inc = income.toString().toFloat()
+
+                    try {
+                        tflite = Interpreter(loadModelFile())
+                    } catch (ex: Exception) {
+                        ex.printStackTrace()
+                    }
+
+                    val current = LocalDateTime.now()
+                    val formatter = DateTimeFormatter.ofPattern("MM")
+                    val formatted = current.format(formatter)
+
+                    val df = DecimalFormat("#.##")
+                    //pred.setOnClickListener(View.OnClickListener {
+                    val prediction = doInference(expenses.toString())
+                    println(prediction)
+                    val target = df.format(prediction)
+                    outp.setText("Target Income: ₱" + target.toString())
+                    ai.setText("Current Income: ₱" + income.toString())
+
+                    val pert = (inc / prediction) * 100
+                    val percentup = df.format(pert)
+                    per.setText(percentup.toString() + "% Achieved")
+
+
+                    val prd = prediction.toFloat()
+
+                    if(formatted == "01") {
+                        barEntries1.add(BarEntry(0f, inc))
+                        barEntries2.add(BarEntry(1f, prediction))
+
+                        val barDataSet1 = BarDataSet(barEntries1, "Current Income")
+                        barDataSet1.setColor(Color.BLUE)
+                        barDataSet1.valueTextSize = 15f
+                        val barDataSet2 = BarDataSet(barEntries2, "Projected Income")
+                        barDataSet2.setColor(Color.RED)
+                        barDataSet2.valueTextSize = 15f
+                        val Projection = BarData(barDataSet1, barDataSet2)
+                        Projection.setValueTextSize(15f)
+                        barChartProject.data = Projection
+
+                        val months = ArrayList<String>()
+                        months.add("January")
+                        val xAxis = barChartProject.xAxis
+                        xAxis.valueFormatter = IndexAxisValueFormatter(months)
+                        xAxis.setCenterAxisLabels(true)
+                        xAxis.position = XAxis.XAxisPosition.BOTTOM
+                        xAxis.granularity = 1f
+                        xAxis.isGranularityEnabled = true
+                        barChartProject.isDragEnabled = true
+                        barChartProject.setVisibleXRangeMaximum(3f)
+
+                        val barSpace = 0.1f
+                        val groupSpace = 0.2f
+                        Projection.barWidth = 0.5f
+                        barChartProject.xAxis.axisMinimum = 0f
+                        barChartProject.groupBars(0f,groupSpace,barSpace)
+                        barChartProject.invalidate()
+                    }
+                    if(formatted == "02") {
+                        barEntries1.add(BarEntry(0f, inc))
+                        barEntries2.add(BarEntry(1f, prediction))
+
+                        val barDataSet1 = BarDataSet(barEntries1, "Current Income")
+                        barDataSet1.setColor(Color.BLUE)
+                        val barDataSet2 = BarDataSet(barEntries2, "Projected Income")
+                        barDataSet2.setColor(Color.RED)
+                        val Projection = BarData(barDataSet1, barDataSet2)
+                        barChartProject.data = Projection
+
+                        val months = ArrayList<String>()
+                        months.add("February")
+                        val xAxis = barChartProject.xAxis
+                        xAxis.valueFormatter = IndexAxisValueFormatter(months)
+                        xAxis.setCenterAxisLabels(true)
+                        xAxis.position = XAxis.XAxisPosition.BOTTOM
+                        xAxis.granularity = 1f
+                        xAxis.isGranularityEnabled = true
+                        barChartProject.isDragEnabled = true
+                        barChartProject.setVisibleXRangeMaximum(3f)
+
+                        val barSpace = 0.1f
+                        val groupSpace = 0.2f
+                        Projection.barWidth = 0.15f
+                        barChartProject.xAxis.axisMinimum = 0f
+                        barChartProject.groupBars(0f,groupSpace,barSpace)
+                        barChartProject.invalidate()
+                    }
+                    if(formatted == "03") {
+                        barEntries1.add(BarEntry(0f, inc))
+                        barEntries2.add(BarEntry(1f, prediction))
+
+                        val barDataSet1 = BarDataSet(barEntries1, "Current Income")
+                        barDataSet1.setColor(Color.BLUE)
+                        val barDataSet2 = BarDataSet(barEntries2, "Projected Income")
+                        barDataSet2.setColor(Color.RED)
+                        val Projection = BarData(barDataSet1, barDataSet2)
+                        barChartProject.data = Projection
+
+                        val months = ArrayList<String>()
+                        months.add("March")
+                        val xAxis = barChartProject.xAxis
+                        xAxis.valueFormatter = IndexAxisValueFormatter(months)
+                        xAxis.setCenterAxisLabels(true)
+                        xAxis.position = XAxis.XAxisPosition.BOTTOM
+                        xAxis.granularity = 1f
+                        xAxis.isGranularityEnabled = true
+                        barChartProject.isDragEnabled = true
+                        barChartProject.setVisibleXRangeMaximum(3f)
+
+                        val barSpace = 0.1f
+                        val groupSpace = 0.5f
+                        Projection.barWidth = 0.15f
+                        barChartProject.xAxis.axisMinimum = 0f
+                        barChartProject.groupBars(0f,groupSpace,barSpace)
+                        barChartProject.invalidate()
+                    }
+                    if(formatted == "04") {
+                        barEntries1.add(BarEntry(0f, inc))
+                        barEntries2.add(BarEntry(1f, prediction))
+
+                        val barDataSet1 = BarDataSet(barEntries1, "Current Income")
+                        barDataSet1.setColor(Color.BLUE)
+                        val barDataSet2 = BarDataSet(barEntries2, "Projected Income")
+                        barDataSet2.setColor(Color.RED)
+                        val Projection = BarData(barDataSet1, barDataSet2)
+                        barChartProject.data = Projection
+
+                        val months = ArrayList<String>()
+                        months.add("April")
+                        val xAxis = barChartProject.xAxis
+                        xAxis.valueFormatter = IndexAxisValueFormatter(months)
+                        xAxis.setCenterAxisLabels(true)
+                        xAxis.position = XAxis.XAxisPosition.BOTTOM
+                        xAxis.granularity = 1f
+                        xAxis.isGranularityEnabled = true
+                        barChartProject.isDragEnabled = true
+                        barChartProject.setVisibleXRangeMaximum(3f)
+
+                        val barSpace = 0.1f
+                        val groupSpace = 0.5f
+                        Projection.barWidth = 0.15f
+                        barChartProject.xAxis.axisMinimum = 0f
+                        barChartProject.groupBars(0f,groupSpace,barSpace)
+                        barChartProject.invalidate()
+                    }
+                    if(formatted == "05") {
+                        barEntries1.add(BarEntry(0f, inc))
+                        barEntries2.add(BarEntry(1f, prediction))
+
+                        val barDataSet1 = BarDataSet(barEntries1, "Current Income")
+                        barDataSet1.setColor(Color.BLUE)
+                        val barDataSet2 = BarDataSet(barEntries2, "Projected Income")
+                        barDataSet2.setColor(Color.RED)
+                        val Projection = BarData(barDataSet1, barDataSet2)
+                        barChartProject.data = Projection
+
+                        val months = ArrayList<String>()
+                        months.add("May")
+                        val xAxis = barChartProject.xAxis
+                        xAxis.valueFormatter = IndexAxisValueFormatter(months)
+                        xAxis.setCenterAxisLabels(true)
+                        xAxis.position = XAxis.XAxisPosition.BOTTOM
+                        xAxis.granularity = 1f
+                        xAxis.isGranularityEnabled = true
+                        barChartProject.isDragEnabled = true
+                        barChartProject.setVisibleXRangeMaximum(3f)
+
+                        val barSpace = 0.1f
+                        val groupSpace = 0.5f
+                        Projection.barWidth = 0.15f
+                        barChartProject.xAxis.axisMinimum = 0f
+                        barChartProject.groupBars(0f,groupSpace,barSpace)
+                        barChartProject.invalidate()
+                    }
+                    if(formatted == "06") {
+                        barEntries1.add(BarEntry(6f, inc))
+                        barEntries2.add(BarEntry(7f, prediction))
+
+                        val barDataSet1 = BarDataSet(barEntries1, "Current Income")
+                        barDataSet1.setColor(Color.BLUE)
+                        val barDataSet2 = BarDataSet(barEntries2, "Projected Income")
+                        barDataSet2.setColor(Color.RED)
+                        val Projection = BarData(barDataSet1, barDataSet2)
+                        barChartProject.data = Projection
+
+                        val months = ArrayList<String>()
+                        months.add("June")
+                        val xAxis = barChartProject.xAxis
+                        xAxis.valueFormatter = IndexAxisValueFormatter(months)
+                        xAxis.setCenterAxisLabels(true)
+                        xAxis.position = XAxis.XAxisPosition.BOTTOM
+                        xAxis.granularity = 1f
+                        xAxis.isGranularityEnabled = true
+                        barChartProject.isDragEnabled = true
+                        barChartProject.setVisibleXRangeMaximum(3f)
+
+                        val barSpace = 0.1f
+                        val groupSpace = 0.5f
+                        Projection.barWidth = 0.15f
+                        barChartProject.xAxis.axisMinimum = 0f
+                        barChartProject.groupBars(0f,groupSpace,barSpace)
+                        barChartProject.invalidate()
+                    }
+                    if(formatted == "07") {
+                        barEntries1.add(BarEntry(0f, inc))
+                        barEntries2.add(BarEntry(1f, prediction))
+
+                        val barDataSet1 = BarDataSet(barEntries1, "Current Income")
+                        barDataSet1.setColor(Color.BLUE)
+                        val barDataSet2 = BarDataSet(barEntries2, "Projected Income")
+                        barDataSet2.setColor(Color.RED)
+                        val Projection = BarData(barDataSet1, barDataSet2)
+                        barChartProject.data = Projection
+
+                        val months = ArrayList<String>()
+                        months.add("July")
+                        val xAxis = barChartProject.xAxis
+                        xAxis.valueFormatter = IndexAxisValueFormatter(months)
+                        xAxis.setCenterAxisLabels(true)
+                        xAxis.position = XAxis.XAxisPosition.BOTTOM
+                        xAxis.granularity = 1f
+                        xAxis.isGranularityEnabled = true
+                        barChartProject.isDragEnabled = true
+                        barChartProject.setVisibleXRangeMaximum(3f)
+
+                        val barSpace = 0.1f
+                        val groupSpace = 0.5f
+                        Projection.barWidth = 0.15f
+                        barChartProject.xAxis.axisMinimum = 0f
+                        barChartProject.groupBars(0f,groupSpace,barSpace)
+                        barChartProject.invalidate()
+                    }
+                    if(formatted == "08") {
+                        barEntries1.add(BarEntry(0f, inc))
+                        barEntries2.add(BarEntry(1f, prediction))
+
+                        val barDataSet1 = BarDataSet(barEntries1, "Current Income")
+                        barDataSet1.setColor(Color.BLUE)
+                        val barDataSet2 = BarDataSet(barEntries2, "Projected Income")
+                        barDataSet2.setColor(Color.RED)
+                        val Projection = BarData(barDataSet1, barDataSet2)
+                        barChartProject.data = Projection
+
+                        val months = ArrayList<String>()
+                        months.add("August")
+                        val xAxis = barChartProject.xAxis
+                        xAxis.valueFormatter = IndexAxisValueFormatter(months)
+                        xAxis.setCenterAxisLabels(true)
+                        xAxis.position = XAxis.XAxisPosition.BOTTOM
+                        xAxis.granularity = 1f
+                        xAxis.isGranularityEnabled = true
+                        barChartProject.isDragEnabled = true
+                        barChartProject.setVisibleXRangeMaximum(3f)
+
+                        val barSpace = 0.1f
+                        val groupSpace = 0.5f
+                        Projection.barWidth = 0.15f
+                        barChartProject.xAxis.axisMinimum = 0f
+                        barChartProject.groupBars(0f,groupSpace,barSpace)
+                        barChartProject.invalidate()
+                    }
+                    if(formatted == "09") {
+                        barEntries1.add(BarEntry(0f, inc))
+                        barEntries2.add(BarEntry(1f, prediction))
+
+                        val barDataSet1 = BarDataSet(barEntries1, "Current Income")
+                        barDataSet1.setColor(Color.BLUE)
+                        val barDataSet2 = BarDataSet(barEntries2, "Projected Income")
+                        barDataSet2.setColor(Color.RED)
+                        val Projection = BarData(barDataSet1, barDataSet2)
+                        barChartProject.data = Projection
+
+                        val months = ArrayList<String>()
+                        months.add("September")
+                        val xAxis = barChartProject.xAxis
+                        xAxis.valueFormatter = IndexAxisValueFormatter(months)
+                        xAxis.setCenterAxisLabels(true)
+                        xAxis.position = XAxis.XAxisPosition.BOTTOM
+                        xAxis.granularity = 1f
+                        xAxis.isGranularityEnabled = true
+                        barChartProject.isDragEnabled = true
+                        barChartProject.setVisibleXRangeMaximum(3f)
+
+                        val barSpace = 0.1f
+                        val groupSpace = 0.5f
+                        Projection.barWidth = 0.15f
+                        barChartProject.xAxis.axisMinimum = 0f
+                        barChartProject.groupBars(0f,groupSpace,barSpace)
+                        barChartProject.invalidate()
+                    }
+                    if(formatted == "10") {
+                        barEntries1.add(BarEntry(0f, inc))
+                        barEntries2.add(BarEntry(1f, prediction))
+
+                        val barDataSet1 = BarDataSet(barEntries1, "Current Income")
+                        barDataSet1.setColor(Color.BLUE)
+                        val barDataSet2 = BarDataSet(barEntries2, "Projected Income")
+                        barDataSet2.setColor(Color.RED)
+                        val Projection = BarData(barDataSet1, barDataSet2)
+                        barChartProject.data = Projection
+
+                        val months = ArrayList<String>()
+                        months.add("October")
+                        val xAxis = barChartProject.xAxis
+                        xAxis.valueFormatter = IndexAxisValueFormatter(months)
+                        xAxis.setCenterAxisLabels(true)
+                        xAxis.position = XAxis.XAxisPosition.BOTTOM
+                        xAxis.granularity = 1f
+                        xAxis.isGranularityEnabled = true
+                        barChartProject.isDragEnabled = true
+                        barChartProject.setVisibleXRangeMaximum(3f)
+
+                        val barSpace = 0.1f
+                        val groupSpace = 0.5f
+                        Projection.barWidth = 0.15f
+                        barChartProject.xAxis.axisMinimum = 0f
+                        barChartProject.groupBars(0f,groupSpace,barSpace)
+                        barChartProject.invalidate()
+                    }
+                    if(formatted == "11") {
+                        barEntries1.add(BarEntry(0f, inc))
+                        barEntries2.add(BarEntry(1f, prediction))
+
+                        val barDataSet1 = BarDataSet(barEntries1, "Current Income")
+                        barDataSet1.setColor(Color.BLUE)
+                        val barDataSet2 = BarDataSet(barEntries2, "Projected Income")
+                        barDataSet2.setColor(Color.RED)
+                        val Projection = BarData(barDataSet1, barDataSet2)
+                        barChartProject.data = Projection
+
+                        val months = ArrayList<String>()
+                        months.add("November")
+                        val xAxis = barChartProject.xAxis
+                        xAxis.valueFormatter = IndexAxisValueFormatter(months)
+                        xAxis.setCenterAxisLabels(true)
+                        xAxis.position = XAxis.XAxisPosition.BOTTOM
+                        xAxis.granularity = 1f
+                        xAxis.isGranularityEnabled = true
+                        barChartProject.isDragEnabled = true
+                        barChartProject.setVisibleXRangeMaximum(3f)
+
+                        val barSpace = 0.1f
+                        val groupSpace = 0.5f
+                        Projection.barWidth = 0.15f
+                        barChartProject.xAxis.axisMinimum = 0f
+                        barChartProject.groupBars(0f,groupSpace,barSpace)
+                        barChartProject.invalidate()
+                    }
+                    if(formatted == "12") {
+                        barEntries1.add(BarEntry(0f, inc))
+                        barEntries2.add(BarEntry(1f, prediction))
+
+                        val barDataSet1 = BarDataSet(barEntries1, "Current Income")
+                        barDataSet1.setColor(Color.BLUE)
+                        val barDataSet2 = BarDataSet(barEntries2, "Projected Income")
+                        barDataSet2.setColor(Color.RED)
+                        val Projection = BarData(barDataSet1, barDataSet2)
+                        barChartProject.data = Projection
+
+                        val months = ArrayList<String>()
+                        months.add("December")
+                        val xAxis = barChartProject.xAxis
+                        xAxis.valueFormatter = IndexAxisValueFormatter(months)
+                        xAxis.setCenterAxisLabels(true)
+                        xAxis.position = XAxis.XAxisPosition.BOTTOM
+                        xAxis.granularity = 1f
+                        xAxis.isGranularityEnabled = true
+                        barChartProject.isDragEnabled = true
+                        barChartProject.setVisibleXRangeMaximum(3f)
+
+                        val barSpace = 0.1f
+                        val groupSpace = 0.5f
+                        Projection.barWidth = 0.15f
+                        barChartProject.xAxis.axisMinimum = 0f
+                        barChartProject.groupBars(0f,groupSpace,barSpace)
+                        barChartProject.invalidate()
+                    }
+
                 } else {
-                    Log.d(ContentValues.TAG, "No such document")
+                    Log.d(TAG, "No such document")
                 }
             }
             .addOnFailureListener { exception ->
@@ -92,70 +533,15 @@ class Finance : AppCompatActivity() {
 
         var revenue: String
         var expenses: String
-/*
-        val profitData = db.collection("users").document(uid)
-        profitData.get()
-            .addOnSuccessListener { document ->
-                if (document != null) {
-                    val index = 0
-                    lineChartProfit = findViewById(R.id.lineChartProfit)
-                    //initLineChart()
 
-
-                    //Log.d(TAG, "DocumentSnapshot data: ${document.data}")
-                    revenue = document.getString("income")!!
-                    expenses = document.getString("expenses")!!
-
-                    val profit = ProfitChart(revenue = revenue, expenses = expenses)
-                    //profitList.add()
-                    profitList.add(profit)
-                    Log.d(ContentValues.TAG, "Prof: ${profitList}")
-                    //val profitVal: ArrayList<ProfitChart> = ArrayList()
-                    val profitEntries: ArrayList<Entry> = ArrayList()
-                    val profData = ArrayList<Float>()
-                    for (i in profitList.indices) {
-                        val profit = profitList[i]
-                        val index = 0
-                        val data = profit.revenue.toFloat() - profit.expenses.toFloat()
-                        profData.add(data)
-                        for(j in profData.indices) {
-                            val profdat = profData[i]
-                            profitEntries.add(
-                                Entry(
-                                    i.toFloat(),
-                                    profdat)
-                            )
-                            val profitDataSet = LineDataSet(profitEntries, "")
-                            //profitDataSet.setColors(*ColorTemplate.PASTEL_COLORS)
-                            profitDataSet.color = resources.getColor(R.color.big_stone)
-
-                            profitDataSet.circleRadius = 10f
-                            profitDataSet.setDrawFilled(true)
-                            profitDataSet.valueTextSize = 20F
-                            profitDataSet.fillColor = resources.getColor(R.color.apache)
-                            //profitDataSet.mode = profitDataSet.
-
-                            val profitData = LineData(profitDataSet)
-                            lineChartProfit.data = profitData
-                            lineChartProfit.setBackgroundColor(resources.getColor(R.color.white))
-                            lineChartProfit.animateXY(2000, 2000, Easing.EaseInCubic)
-                            lineChartProfit.invalidate()
-                        }
-                    }
-                } else {
-                    Log.d(ContentValues.TAG, "No such document")
-                }
-            }
-            .addOnFailureListener {
-                Log.w(ContentValues.TAG, "Error getting documents:")
-            }
-*/
         val productList: ArrayList<ProductBar> = ArrayList<ProductBar>()
         var productName: String
         var productCode: String
         var price: String
         var soldItems: String
         var stockLevel: String
+
+
 
         val productsData = db.collection("users").document(uid).collection("products")
         productsData.whereEqualTo("uid", uid)
@@ -164,10 +550,12 @@ class Finance : AppCompatActivity() {
                 for (document in documents) {
                     if (document != null) {
                         val index = 0
-                        lineChart = findViewById(R.id.lineChartProfit)
+                        //lineChart = findViewById(R.id.lineChartProfit)
                         barChartRevenue = findViewById(R.id.barChartRevenue)
+                        barChartFutureRevenue = findViewById(R.id.barChartFutureRevenue)
 
                         initBarChartRevenue()
+                        initBarChartFutureRevenue()
 
                         //Log.d(TAG, "DocumentSnapshot data: ${document.data}")
                         productName = document.getString("productName")!!
@@ -186,19 +574,23 @@ class Finance : AppCompatActivity() {
                         productList.add(product)
 
                         val SalesEntries: ArrayList<BarEntry> = ArrayList()
-                        val lineEntries: ArrayList<Entry> = ArrayList()
+                        val futureSalesEntries: ArrayList<BarEntry> = ArrayList()
 
                         val name = ArrayList<String>()
+                        val prof = ArrayList<Float>()
+                        val sum = ArrayList<Float>()
                         Log.d(ContentValues.TAG, "List: ${productList}")
                         for (i in productList.indices) {
                             val score = productList[i]
                             name.add(score.name1)
                             SalesEntries.add(BarEntry(i.toFloat(), (score.price1.toFloat() * score.soldItems1.toFloat())))
+                            futureSalesEntries.add(BarEntry(i.toFloat(), (score.price1.toFloat() * score.stockLevel.toFloat())))
 
                             //
                             //SALES PER PRODUCT BARCHART (barChartSales)
                             //
                             barChartRevenue.xAxis.valueFormatter = IndexAxisValueFormatter(name)
+
                             //barChartRevenue.legend.isEnabled = false
                             //barChartRevenue.description.isEnabled = false
                             //barChartRevenue.axisLeft.setDrawGridLines(false)
@@ -207,6 +599,7 @@ class Finance : AppCompatActivity() {
 
 
                             val RevenueDataSet = BarDataSet(SalesEntries, score.name1)
+                            RevenueDataSet.valueTextSize = 15f
                             RevenueDataSet.setColors(*ColorTemplate.JOYFUL_COLORS)
 
                             val Salesdata = BarData(RevenueDataSet)
@@ -214,26 +607,48 @@ class Finance : AppCompatActivity() {
                             barChartRevenue.invalidate()
 
 
-                            //
-                            //Line chart
-                            //
-                            lineEntries.add(Entry(i.toFloat(), (score.price1.toFloat() * score.soldItems1.toFloat())))
-                            val profitDataSet = LineDataSet(lineEntries, "")
-                            //profitDataSet.setColors(*ColorTemplate.PASTEL_COLORS)
-                            profitDataSet.color = resources.getColor(R.color.big_stone)
+                            barChartFutureRevenue.xAxis.valueFormatter = IndexAxisValueFormatter(name)
+                            val futureRevenueDataSet = BarDataSet(futureSalesEntries, score.name1)
+                            futureRevenueDataSet.valueTextSize = 15f
+                            futureRevenueDataSet.setColors(*ColorTemplate.JOYFUL_COLORS)
 
-                            profitDataSet.circleRadius = 10f
-                            profitDataSet.setDrawFilled(true)
-                            profitDataSet.valueTextSize = 20F
-                            profitDataSet.fillColor = resources.getColor(R.color.apache)
+                            val futureSalesData = BarData(futureRevenueDataSet)
+                            barChartFutureRevenue.data = futureSalesData
+                            barChartFutureRevenue.invalidate()
+
+/*
+                            prof.add((score.price1.toFloat() * score.soldItems1.toFloat()))
+                            sum.add(prof.sum())
+                            Log.d(ContentValues.TAG, "sum: ${sum}")
+                            for(j in sum.indices) {
+                                val ctr = sum[j]
+                                //
+                                //Line chart
+                                //
+                                //lineEntries.add(Entry(i.toFloat(), (score.price1.toFloat() * score.soldItems1.toFloat())))
+                                lineEntries.add(Entry(j.toFloat(), ctr ))
+
+                                val profitDataSet = LineDataSet(lineEntries, "Income")
+                                //profitDataSet.setColors(*ColorTemplate.PASTEL_COLORS)
+                                profitDataSet.color = resources.getColor(R.color.big_stone)
+
+                                profitDataSet.circleRadius = 10f
+                                profitDataSet.setDrawFilled(true)
+                                profitDataSet.valueTextSize = 10F
+                                profitDataSet.fillColor = resources.getColor(R.color.apache)
+
+
+                                val profitData = LineData(profitDataSet)
+                                lineChart.data = profitData
+                                lineChart.xAxis.valueFormatter = IndexAxisValueFormatter(name)
+                            }
+*/
                             //profitDataSet.mode = profitDataSet.
 
 
-                            val profitData = LineData(profitDataSet)
-                            lineChart.data = profitData
-                            lineChart.setBackgroundColor(resources.getColor(R.color.white))
-                            lineChart.animateXY(2000, 2000, Easing.EaseInCubic)
-                            lineChart.invalidate()
+                            //lineChart.setBackgroundColor(resources.getColor(R.color.white))
+                            //lineChart.animateXY(2000, 2000, Easing.EaseInCubic)
+                            //lineChart.invalidate()
                         }
                     } else {
                         Log.d(ContentValues.TAG, "No such document")
@@ -254,6 +669,7 @@ class Finance : AppCompatActivity() {
         val rawMaterialsData= db.collection("users").document(uid).collection("materials")
         rawMaterialsData.whereEqualTo("uid", uid)
             .get()
+
             .addOnSuccessListener { documents ->
                 for (document in documents) {
                     if (document != null) {
@@ -270,6 +686,9 @@ class Finance : AppCompatActivity() {
                         matStockLevel = document.getString("stockLevel")!!
                         threshholdLevel = document.getString("thresholdLevel")!!
 
+                        db.collection("users").document(uid).collection("materials")
+                            .whereEqualTo("uid", uid)
+
                         val material = MaterialBar(
                             materialName = materialName,
                             materialCode = materialCode,
@@ -281,11 +700,16 @@ class Finance : AppCompatActivity() {
 
                         val expensesEntries: ArrayList<BarEntry> = ArrayList()
                         val rawName = ArrayList<String>()
+                        val sum = ArrayList<Float>()
                         Log.d(ContentValues.TAG, "List: ${productList}")
                         for (i in materialList.indices) {
                             val raw = materialList[i]
                             expensesEntries.add(BarEntry(i.toFloat(), (raw.stockLevel.toFloat() * raw.materialPrice.toFloat())))
                             rawName.add(raw.materialName)
+
+                            //sum.add(raw.stockLevel.toFloat() * raw.materialPrice.toFloat())
+                            val exp = sum.sum()
+
 
                             //
                             //Expenses Bar Chart
@@ -296,6 +720,7 @@ class Finance : AppCompatActivity() {
 
                             val RawMaterialsDataSet = BarDataSet(expensesEntries, "")
                             RawMaterialsDataSet.setColors(*ColorTemplate.MATERIAL_COLORS)
+                            RawMaterialsDataSet.valueTextSize = 15f
                             Log.d(ContentValues.TAG, "ArrayL: ${productList}")
                             val RawMaterialsData = BarData(RawMaterialsDataSet)
                             barChartExpenses.data = RawMaterialsData
@@ -310,6 +735,25 @@ class Finance : AppCompatActivity() {
                 Log.w(ContentValues.TAG, "Error getting documents:")
             }
     }
+
+    @Throws(IOException::class)
+    private fun loadModelFile(): MappedByteBuffer {
+        val fileDescriptor = this.assets.openFd("analytics.tflite")
+        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
+        val fileChannel = inputStream.channel
+        val startOffset = fileDescriptor.startOffset
+        val declareLength = fileDescriptor.declaredLength
+        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declareLength)
+    }
+
+    private fun doInference(inputString: String): Float {
+        val inputVal = FloatArray(1)
+        inputVal[0] = inputString.toFloat()
+        val output = Array(1) { FloatArray(1) }
+        tflite!!.run(inputVal, output)
+        return output[0][0]
+    }
+
     private fun initBarChartRevenue() {
 
 //        hide grid lines
@@ -339,7 +783,34 @@ class Finance : AppCompatActivity() {
 
     }
 
+    private fun initBarChartFutureRevenue() {
 
+//        hide grid lines
+        barChartFutureRevenue.axisLeft.setDrawGridLines(false)
+        val xAxis: XAxis = barChartFutureRevenue.xAxis
+        xAxis.setDrawGridLines(false)
+        xAxis.setDrawAxisLine(false)
+
+        //remove right y-axis
+        barChartFutureRevenue.axisRight.isEnabled = false
+
+        //remove legend
+        barChartFutureRevenue.legend.isEnabled = false
+
+        //remove description label
+        barChartFutureRevenue.description.isEnabled = false
+
+        //add animation
+        barChartFutureRevenue.animateY(3000)
+
+        // to draw label on xAxis
+        xAxis.position = XAxis.XAxisPosition.BOTTOM_INSIDE
+        //xAxis.valueFormatter = MyAxisFormatter()
+        xAxis.setDrawLabels(true)
+        xAxis.granularity = 1f
+        xAxis.labelRotationAngle = 0f
+
+    }
 
     private fun initBarChartExpenses() {
 
@@ -370,6 +841,122 @@ class Finance : AppCompatActivity() {
         xAxis.labelRotationAngle = 0f
 
 
+    }
+
+    private fun initBarChartProject() {
+
+//        hide grid lines
+        barChartProject.axisLeft.setDrawGridLines(false)
+        val xAxis: XAxis = barChartProject.xAxis
+        xAxis.setDrawGridLines(false)
+        xAxis.setDrawAxisLine(false)
+
+
+        //remove right y-axis
+        barChartProject.axisRight.isEnabled = false
+
+        //remove legend
+        barChartProject.legend.isEnabled = false
+
+        //remove description label
+        barChartProject.description.isEnabled = false
+
+        //add animation
+        barChartProject.animateY(3000)
+
+        // to draw label on xAxis
+        xAxis.position = XAxis.XAxisPosition.BOTTOM_INSIDE
+        //xAxis.valueFormatter = MyAxisFormatter()
+        xAxis.setDrawLabels(true)
+        xAxis.granularity = 1f
+        xAxis.labelRotationAngle = 0f
+    }
+
+    inner class MyAxisFormatter : IndexAxisValueFormatter() {
+        override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+            val index = value.toInt()
+            Log.d(ContentValues.TAG, "getAxisLabel: index $index")
+            return if (index < productList.size) {
+                productList[index].name1
+            } else {
+                ""
+            }
+        }
+    }
+
+    private fun initLineChart() {
+
+//        hide grid lines
+        lineChart.axisLeft.setDrawGridLines(false)
+        val xAxis: XAxis = lineChart.xAxis
+        xAxis.setDrawGridLines(false)
+        xAxis.setDrawAxisLine(false)
+
+        //remove right y-axis
+        lineChart.axisRight.isEnabled = false
+
+        //remove legend
+        lineChart.legend.isEnabled = false
+
+
+        //remove description label
+        lineChart.description.isEnabled = false
+
+
+        //add animation
+        lineChart.animateX(1000, Easing.EaseInSine)
+
+        // to draw label on xAxis
+        xAxis.position = XAxis.XAxisPosition.BOTTOM_INSIDE
+        //xAxis.valueFormatter = MyAxisFormatter()
+        xAxis.setDrawLabels(true)
+        xAxis.granularity = 1f
+        xAxis.labelRotationAngle = +0f
+
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun getMonth(){
+
+        val current = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("MM")
+        val formatted = current.format(formatter)
+        if (formatted == "01") {
+            month.setText("January")
+        }
+        if (formatted == "02") {
+            month.setText("February")
+        }
+        if (formatted == "03") {
+            month.setText("March")
+        }
+        if (formatted == "04") {
+            month.setText("April")
+        }
+        if (formatted == "05") {
+            month.setText("May")
+        }
+        if (formatted == "06") {
+            month.setText("June")
+        }
+        if (formatted == "07") {
+            month.setText("July")
+        }
+        if (formatted == "08") {
+            month.setText("Augusut")
+        }
+        if (formatted == "09") {
+            month.setText("September")
+        }
+        if (formatted == "10") {
+            month.setText("October")
+        }
+        if (formatted == "11") {
+            month.setText("November")
+        }
+        if (formatted == "12") {
+            month.setText("December")
+        }
     }
 
 }

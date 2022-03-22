@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.TextView
 import com.example.acapp_v_2.R
 import com.example.acapp_v_2.models.MaterialBar
@@ -32,6 +33,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firestore.admin.v1.Index
 import kotlinx.android.synthetic.main.activity_dashboard.*
+import java.lang.Exception
 
 class DashboardActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
@@ -52,10 +54,20 @@ class DashboardActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard)
+        overridePendingTransition(0,0)
 
         val menu: Menu = bottomNavigationBar.menu
         val menuItem: MenuItem = menu.getItem(0)
         menuItem.setChecked(true)
+
+        val back = findViewById<View>(R.id.back)
+        back.setOnClickListener {
+            val intent = Intent(this, HomeActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(0,0)
+            finish()
+        }
+
 
         bottomNavigationBar.setOnNavigationItemSelectedListener {
             if (it.itemId == R.id.ic_finance){
@@ -73,6 +85,7 @@ class DashboardActivity : AppCompatActivity() {
         }
 
         val dashBusinessName = findViewById<TextView>(R.id.dashBusinessName)
+        //val sumText = findViewById<TextView>(R.id.sum)
         val productList: ArrayList<ProductBar> = ArrayList<ProductBar>()
         var productName: String
         var productCode: String
@@ -110,6 +123,23 @@ class DashboardActivity : AppCompatActivity() {
                     if (document != null) {
                         val index = 0
 
+                        val colors = ArrayList<Int>()
+                        colors.add(Color.rgb(236, 207, 105))
+                        colors.add(Color.rgb(167, 188, 215))
+                        colors.add(Color.rgb(145, 144, 172))
+                        colors.add(Color.rgb(90, 104, 124))
+                        colors.add(Color.rgb(248, 231, 172))
+                        colors.add(Color.rgb(216, 227, 125))
+                        colors.add(Color.rgb(127, 208, 212))
+                        colors.add(Color.rgb(125, 164, 199))
+                        colors.add(Color.rgb(70, 123, 164))
+                        colors.add(Color.rgb(218, 251, 199))
+                        colors.add(Color.rgb(216, 227, 215))
+                        colors.add(Color.rgb(137, 218, 235))
+                        colors.add(Color.rgb(105, 164, 193))
+                        colors.add(Color.rgb(30, 194, 112))
+                        colors.add(Color.rgb(198, 100, 172))
+
                         //Connect barChart to UI
                         barChartSales = findViewById(R.id.barChartSales)
                         barChartRawMaterials = findViewById(R.id.barChartRawMaterials)
@@ -145,6 +175,9 @@ class DashboardActivity : AppCompatActivity() {
 
                         val pieEntries = ArrayList<PieEntry>()
                         val name = ArrayList<String>()
+                        val prof = ArrayList<Float>()
+
+                        val sum = ArrayList<Float>()
                         Log.d(ContentValues.TAG, "List: ${productList}")
                         for (i in productList.indices) {
                             val score = productList[i]
@@ -154,17 +187,18 @@ class DashboardActivity : AppCompatActivity() {
                             name.add(score.name1)
                             pieEntries.add(PieEntry(score.soldItems1.toFloat(), score.name1))
 
-
+                            //prof.add((score.price1.toFloat() * score.soldItems1.toFloat()))
+                            //sum.add(prof.sum())
+                            //Log.d(ContentValues.TAG, "sum1: ${sum}")
+                            //sumText.text = sum.toString()
                             ///
                             // MOST SOLD PRODUCT PIE CHART
                             ///
-
-
                             val dataSet = PieDataSet(pieEntries, "")
-                            dataSet.setColors(*ColorTemplate.PASTEL_COLORS)
+                            dataSet.setColors(colors)
                             val data = PieData(dataSet)
 
-                            pieChart.setExtraOffsets(5f, 10f, 5f, 5f)
+                            pieChart.setExtraOffsets(5f, 1f, 5f, 5f)
                             pieChart.animateY(1400, Easing.EaseInOutQuad)
                             pieChart.data = data
 
@@ -184,11 +218,13 @@ class DashboardActivity : AppCompatActivity() {
                             //
                             barChartSales.xAxis.valueFormatter = IndexAxisValueFormatter(name)
                             val SalesDataSet = BarDataSet(SalesEntries, score.name1)
-                            SalesDataSet.setColors(*ColorTemplate.PASTEL_COLORS)
+                            SalesDataSet.setColors(colors)
                             Log.d(ContentValues.TAG, "ArrayL: ${productList}")
                             val Salesdata = BarData(SalesDataSet)
                             barChartSales.data = Salesdata
                             barChartSales.invalidate()
+
+
 
                         }
                     } else {
@@ -296,7 +332,7 @@ class DashboardActivity : AppCompatActivity() {
         //xAxis.valueFormatter = MyAxisFormatter()
         xAxis.setDrawLabels(true)
         xAxis.granularity = 1f
-        xAxis.labelRotationAngle = +90f
+        xAxis.labelRotationAngle = +0f
 
     }
 
@@ -361,7 +397,7 @@ class DashboardActivity : AppCompatActivity() {
         //xAxis.valueFormatter = MyAxisFormatter()
         xAxis.setDrawLabels(true)
         xAxis.granularity = 1f
-        xAxis.labelRotationAngle = +90f
+        xAxis.labelRotationAngle = +0f
     }
 }
 

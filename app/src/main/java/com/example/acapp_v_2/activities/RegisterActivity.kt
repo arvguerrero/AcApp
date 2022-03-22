@@ -9,7 +9,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.acapp_v_2.R
-import com.example.acapp_v_2.databinding.ActivityMainBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
@@ -87,6 +86,7 @@ class RegisterActivity : AppCompatActivity() {
         user["uid"] = userId
         user["income"] = "0"
         user["expenses"] = "0"
+        user["mobile"] = ""
 
 
         db.collection("users")
